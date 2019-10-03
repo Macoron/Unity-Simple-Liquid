@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2543850318960091211}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 1.893, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.48715585, y: 0.48715585, z: 0.48715585}
   m_Children:
   - {fileID: 4978369109101898360}
   - {fileID: 4010355648684805109}
@@ -48,9 +48,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   liquidRender: {fileID: 8479694515570843939}
   liquidMaterial: {fileID: 2100000, guid: 8dec526bbd84d684da6f40f79c3ab1bd, type: 2}
-  liquidColor: {r: 0.81739944, g: 0.8584906, b: 0, a: 1}
-  fillAmountPercent: 0.601
-  customVolume: 0
+  cap: {fileID: 7634469175278025645}
+  isOpen: 0
+  inertness: 50
+  liquidColor: {r: 0, g: 0, b: 0, a: 0.28627452}
+  fillAmountPercent: 0.66
+  customVolume: 1
 --- !u!1 &4368494120379776360
 GameObject:
   m_ObjectHideFlags: 0

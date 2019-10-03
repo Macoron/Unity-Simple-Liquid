@@ -14,10 +14,19 @@ namespace UnitySimpleLiquid
         private MeshFilter meshFilter;
 
         [SerializeField]
+        [Tooltip("Material prefab (will replace material on mesh renderer)")]
         private Material liquidMaterial;
 
+        [Header("Container settings")]
+        [SerializeField]
+        private GameObject cap;
+        [SerializeField]
+        private bool isOpen = true;
 
         [Header("Liquid settings")]
+        [Tooltip("Smaller inertness - less still liquid")]
+        public float inertness = 50;
+
         [SerializeField]
         private Color liquidColor = Color.green;
 
@@ -25,10 +34,8 @@ namespace UnitySimpleLiquid
         [SerializeField]
         private float fillAmountPercent = 0.5f;
 
-        private Vector3 surfaceLevel;
-        private Vector3 gravityDirection;
-
 		[SerializeField]
+        [Tooltip("Volume is fixed and not calculated automatically")]
 		private bool customVolume;
         private float volume = 1f;
 
@@ -36,6 +43,9 @@ namespace UnitySimpleLiquid
         // After this values shader might become unstable
         private const float minFillAmount = 0.1f;
         private const float maxFillAmount = 0.99f;
+
+        private Vector3 surfaceLevel;
+        private Vector3 gravityDirection;
 
         /// <summary>
         /// Amount of liquid in percents [0,1]
@@ -50,6 +60,22 @@ namespace UnitySimpleLiquid
             {
                 fillAmountPercent = value;
                 UpdateSurfacePos();
+            }
+        }
+
+        /// <summary>
+        /// Amount of liquid in liters
+        /// </summary>
+        public float FillAmount
+        {
+            get
+            {
+                return fillAmountPercent * volume;
+            }
+            set
+            {
+                var newValuePercent = value / volume;
+                fillAmountPercent = Mathf.Clamp01(newValuePercent);
             }
         }
 
@@ -115,6 +141,19 @@ namespace UnitySimpleLiquid
             }
             else
                 liquidRender.enabled = false;
+        }
+
+        private Vector3 CalculateWoldSurfaceLevel()
+        {
+            var bounds = liquidRender.bounds;
+            var min = bounds.min.y;
+            var max = bounds.max.y;
+
+            var surface = MappedFillAmount * (max - min) + min;
+            var center = bounds.center;
+            center.y = surface;
+
+            return center;
         }
         #endregion
 
@@ -203,6 +242,59 @@ namespace UnitySimpleLiquid
         }
         #endregion
 
+        #region Wobble Effect
+        private const float rotCoef = 0.2f;
+
+        private Vector3 lastPos, lastUp;
+        private Vector3 wobbleAcm;
+
+        private void UpdateWoble()
+        {
+            var velocity = (transform.position - lastPos) / Time.fixedDeltaTime;
+            var rotVelocity = (transform.up - lastUp) / Time.fixedDeltaTime;
+            wobbleAcm += velocity + rotVelocity * rotCoef;
+            wobbleAcm = Vector3.Lerp(wobbleAcm, Vector3.zero, Time.fixedDeltaTime);
+
+            var sin = Mathf.Sin(2 * Mathf.PI * Time.time) / inertness;
+            var wobble = wobbleAcm * sin;
+            //wobble = wobbleToAdd * (Mathf.Sin((1f + wobbleToAdd.magnitude) * 2 *Mathf.PI)  * inertness);
+
+            Vector3 gravity;
+            if (fillAmountPercent > maxFillAmount && !isOpen)
+                gravity = Vector3.down;
+            else
+                gravity = (Vector3.down + wobble).normalized;
+
+            gravity.y = -1;
+
+            GravityDirection = gravity;
+
+            lastPos = transform.position;
+            lastUp = transform.up;
+        }
+        #endregion
+
+        public bool IsOpen
+        {
+            get
+            {
+                return isOpen;
+            }
+            set
+            {
+                isOpen = value;
+                if (cap)
+                    cap.SetActive(!value);
+            }
+        }
+
+        private void OnEnable()
+        {
+            // reset values for voble effect
+            lastPos = transform.position;
+            lastUp = transform.up;
+        }
+
         private void Update()
         {
             if (liquidRender == null)
@@ -214,6 +306,9 @@ namespace UnitySimpleLiquid
             // In case transform scale is changed - update volume
             if (!customVolume)
                 volume = CalculateVolume();
+
+            if (Application.isPlaying)
+                UpdateWoble();
         }
 
         private void OnValidate()
@@ -223,6 +318,7 @@ namespace UnitySimpleLiquid
 
             LiquidColor = liquidColor;
             FillAmountPercent = fillAmountPercent;
+            IsOpen = isOpen;
         }
 
         private Mesh LiquidMesh
@@ -235,18 +331,7 @@ namespace UnitySimpleLiquid
             }
         }
  
-        private Vector3 CalculateWoldSurfaceLevel()
-        {
-            var bounds = liquidRender.bounds;
-            var min = bounds.min.y;
-            var max = bounds.max.y;
 
-            var surface = MappedFillAmount * (max - min) + min;
-            var center = bounds.center;
-            center.y = surface;
-
-            return center;
-        }
     }
 }
 

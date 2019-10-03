@@ -125,6 +125,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   liquidRender: {fileID: 765355747951042094}
   liquidMaterial: {fileID: 2100000, guid: 8dec526bbd84d684da6f40f79c3ab1bd, type: 2}
+  cap: {fileID: 0}
+  isOpen: 0
+  inertness: 50
   liquidColor: {r: 0.3679245, g: 0.14582516, b: 0.09545212, a: 0.4117647}
   fillAmountPercent: 0.621
   customVolume: 0
