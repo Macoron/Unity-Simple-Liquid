@@ -47,9 +47,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   liquidRender: {fileID: 8479694515570843939}
-  fillAmountPercent: 0.601
-  liquidColor: {r: 0.81739944, g: 0.8584906, b: 0, a: 1}
   liquidMaterial: {fileID: 2100000, guid: 8dec526bbd84d684da6f40f79c3ab1bd, type: 2}
+  liquidColor: {r: 0.81739944, g: 0.8584906, b: 0, a: 1}
+  fillAmountPercent: 0.601
+  customVolume: 0
 --- !u!1 &4368494120379776360
 GameObject:
   m_ObjectHideFlags: 0

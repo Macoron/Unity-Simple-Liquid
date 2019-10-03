@@ -11,22 +11,29 @@ namespace UnitySimpleLiquid
     {
         [SerializeField]
         private MeshRenderer liquidRender;
+        private MeshFilter meshFilter;
+
+        [SerializeField]
+        private Material liquidMaterial;
+
+
+        [Header("Liquid settings")]
+        [SerializeField]
+        private Color liquidColor = Color.green;
 
         [Range(0f, 1f)]
         [SerializeField]
         private float fillAmountPercent = 0.5f;
 
-        [SerializeField]
-        private Color liquidColor = Color.green;
-
-        [SerializeField]
-        private Material liquidMaterial;
-
         private Vector3 surfaceLevel;
         private Vector3 gravityDirection;
 
+		[SerializeField]
+		private bool customVolume;
+        private float volume = 1f;
+
         #region Liquid Amount
-        // After this values shader becomes unstable
+        // After this values shader might become unstable
         private const float minFillAmount = 0.1f;
         private const float maxFillAmount = 0.99f;
 
@@ -47,14 +54,56 @@ namespace UnitySimpleLiquid
         }
 
         /// <summary>
-        /// Need to map fill amount for more stable results
-        /// </summary>
-        private float MappedFillAmount
+		/// Container volume in liters
+		/// </summary>
+        public float Volume
+		{
+            get
+			{
+				return volume;
+			}
+            set
+			{
+				volume = value;
+			}
+		}
+
+		/// <summary>
+		/// Volume is fixed and not calculated automatically
+		/// </summary>
+		public bool CustomVolume
+		{
+            get
+			{
+				return customVolume;
+			}
+		}
+
+		/// <summary>
+		/// Need to map fill amount for more stable results
+		/// </summary>
+		private float MappedFillAmount
         {
             get
             {
                 return FillAmountPercent * (maxFillAmount - minFillAmount) + minFillAmount;
             }
+        }
+
+        /// <summary>
+        /// Calculate container volume based on mesh bounds and transform size 
+        /// </summary>
+        /// <returns>Container volume in liters</returns>
+        public float CalculateVolume()
+        {
+            var mesh = LiquidMesh;
+            if (!mesh)
+                return 0f;
+
+            var boundsSize = LiquidMesh.bounds.size;
+            var scale = transform.lossyScale;
+            return boundsSize.x * boundsSize.y * boundsSize.z *
+                scale.x * scale.y * scale.z * 1000;
         }
 
         private void UpdateSurfacePos()
@@ -85,6 +134,7 @@ namespace UnitySimpleLiquid
                 if (liquidRender == null)
                     return null;
 
+                // Check if there is valid material instance
                 if (materialInstance == null || liquidRender.sharedMaterial != materialInstance)
                 {
                     if (liquidMaterial != null)
@@ -158,7 +208,12 @@ namespace UnitySimpleLiquid
             if (liquidRender == null)
                 return;
 
+            // Update surface volume
             UpdateSurfacePos();
+
+            // In case transform scale is changed - update volume
+            if (!customVolume)
+                volume = CalculateVolume();
         }
 
         private void OnValidate()
@@ -170,6 +225,16 @@ namespace UnitySimpleLiquid
             FillAmountPercent = fillAmountPercent;
         }
 
+        private Mesh LiquidMesh
+        {
+            get
+            {
+                if (meshFilter == null)
+                    meshFilter = liquidRender?.GetComponent<MeshFilter>();
+                return meshFilter?.sharedMesh;
+            }
+        }
+ 
         private Vector3 CalculateWoldSurfaceLevel()
         {
             var bounds = liquidRender.bounds;
