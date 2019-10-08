@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace UnitySimpleLiquid
 {
-    [CustomEditor(typeof(SimpleLiquid))]
-    public class SimpleLiquidEditor : Editor
+    [CustomEditor(typeof(LiquidContainer))]
+    public class LiquidContainerEditor : Editor
     {
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
 
-            var liquid = (SimpleLiquid)target;
+            var liquid = (LiquidContainer)target;
 
             if (liquid.CustomVolume)
             {

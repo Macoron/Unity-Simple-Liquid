@@ -6,8 +6,12 @@ using UnityEngine;
 
 namespace UnitySimpleLiquid
 {
+    /// <summary>
+    /// Container with defined volume and liquid amount
+    /// Also controls liquid rendering (color, surface level, wobble effect)
+    /// </summary>
     [ExecuteInEditMode]
-    public class SimpleLiquid : MonoBehaviour
+    public class LiquidContainer : MonoBehaviour
     {
         [SerializeField]
         private MeshRenderer liquidRender;
@@ -21,6 +25,7 @@ namespace UnitySimpleLiquid
         [SerializeField]
         private GameObject cap;
         [SerializeField]
+        [Tooltip("Is container open and can split?")]
         private bool isOpen = true;
 
         [Header("Liquid settings")]
@@ -34,8 +39,8 @@ namespace UnitySimpleLiquid
         [SerializeField]
         private float fillAmountPercent = 0.5f;
 
-		[SerializeField]
-        [Tooltip("Volume is fixed and not calculated automatically")]
+        [Header("Container Volume")]
+        [SerializeField]
 		private bool customVolume;
         private float volume = 1f;
 
@@ -44,8 +49,19 @@ namespace UnitySimpleLiquid
         private const float minFillAmount = 0.1f;
         private const float maxFillAmount = 0.99f;
 
-        private Vector3 surfaceLevel;
-        private Vector3 gravityDirection;
+        public bool IsOpen
+        {
+            get
+            {
+                return isOpen;
+            }
+            set
+            {
+                isOpen = value;
+                if (cap)
+                    cap.SetActive(!value);
+            }
+        }
 
         /// <summary>
         /// Amount of liquid in percents [0,1]
@@ -131,6 +147,26 @@ namespace UnitySimpleLiquid
             return boundsSize.x * boundsSize.y * boundsSize.z *
                 scale.x * scale.y * scale.z * 1000;
         }
+        #endregion
+
+        #region Liquid Surface
+        private Vector3 surfaceLevel;
+        /// <summary>
+        ///  Surface level of liquid in world-space coordinates
+        /// </summary>
+        public Vector3 SurfaceLevel
+        {
+            get
+            {
+                return surfaceLevel;
+            }
+            set
+            {
+                surfaceLevel = value;
+                if (MaterialInstance)
+                    MaterialInstance.SetVector(SurfaceLevelID, value);
+            }
+        }
 
         private void UpdateSurfacePos()
         {
@@ -155,6 +191,38 @@ namespace UnitySimpleLiquid
 
             return center;
         }
+
+        /// <summary>
+        /// Generate surface plane in world-space coordinates
+        /// </summary>
+        /// <returns></returns>
+        public Plane GenerateSurfacePlane()
+        {
+            return new Plane(-gravityDirection,
+                surfaceLevel.y - transform.position.y);
+        }
+        #endregion
+
+        #region Gravity
+
+        private Vector3 gravityDirection = Vector3.down;
+        /// <summary>
+        /// Direction which liquid trying to align to
+        /// </summary>
+        public Vector3 GravityDirection
+        {
+            get
+            {
+                return gravityDirection;
+            }
+            set
+            {
+                gravityDirection = value;
+                if (MaterialInstance)
+                    MaterialInstance.SetVector(GravityDirectionID, value);
+            }
+        }
+
         #endregion
 
         #region Material Settings
@@ -191,36 +259,15 @@ namespace UnitySimpleLiquid
         }
 
         /// <summary>
-        /// Direction which liquid trying to align to
+        /// Shared mesh that represent liquids
         /// </summary>
-        public Vector3 GravityDirection
+        public Mesh LiquidMesh
         {
             get
             {
-                return gravityDirection;
-            }
-            set
-            {
-                gravityDirection = value;
-                if (MaterialInstance)
-                    MaterialInstance.SetVector(GravityDirectionID, value);
-            }
-        }
-
-        /// <summary>
-        ///  Surface level of liquid in world-space coordinates
-        /// </summary>
-        public Vector3 SurfaceLevel
-        {
-            get
-            {
-                return surfaceLevel;
-            }
-            set
-            {
-                surfaceLevel = value;
-                if (MaterialInstance)
-                    MaterialInstance.SetVector(SurfaceLevelID, value);
+                if (meshFilter == null)
+                    meshFilter = liquidRender?.GetComponent<MeshFilter>();
+                return meshFilter?.sharedMesh;
             }
         }
 
@@ -274,19 +321,17 @@ namespace UnitySimpleLiquid
         }
         #endregion
 
-        public bool IsOpen
+        #region Gizmos
+        private void OnDrawGizmosSelected()
         {
-            get
-            {
-                return isOpen;
-            }
-            set
-            {
-                isOpen = value;
-                if (cap)
-                    cap.SetActive(!value);
-            }
+            // Draws liquid surface
+            UpdateSurfacePos();
+            var surfacePlane = GenerateSurfacePlane();
+            Gizmos.color = Color.green;
+            GizmosHelper.DrawPlaneGizmos(surfacePlane, transform);
+
         }
+        #endregion
 
         private void OnEnable()
         {
@@ -319,18 +364,7 @@ namespace UnitySimpleLiquid
             LiquidColor = liquidColor;
             FillAmountPercent = fillAmountPercent;
             IsOpen = isOpen;
-        }
-
-        private Mesh LiquidMesh
-        {
-            get
-            {
-                if (meshFilter == null)
-                    meshFilter = liquidRender?.GetComponent<MeshFilter>();
-                return meshFilter?.sharedMesh;
-            }
-        }
- 
+        } 
 
     }
 }

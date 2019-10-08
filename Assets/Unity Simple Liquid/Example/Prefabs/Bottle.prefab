@@ -51,9 +51,9 @@ MonoBehaviour:
   cap: {fileID: 7634469175278025645}
   isOpen: 0
   inertness: 50
-  liquidColor: {r: 0, g: 0, b: 0, a: 0.28627452}
+  liquidColor: {r: 0.1882353, g: 0.34948653, b: 0.5294118, a: 0.28627452}
   fillAmountPercent: 0.66
-  customVolume: 1
+  customVolume: 0
 --- !u!1 &4368494120379776360
 GameObject:
   m_ObjectHideFlags: 0
