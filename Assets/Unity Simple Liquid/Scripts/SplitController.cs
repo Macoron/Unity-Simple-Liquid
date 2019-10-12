@@ -15,6 +15,9 @@ namespace UnitySimpleLiquid
         public LiquidContainer liquidContainer;
         public float botleneckRadius = 0.1f;
 
+        [Tooltip("How fast liquid split from container")]
+        public float splitSpeed = 2f;
+
         public ParticleSystem particlesPrefab;
 
         #region Particles
@@ -23,12 +26,28 @@ namespace UnitySimpleLiquid
         {
             get
             {
+                if (!particlesPrefab)
+                    return null;
+
                 if (!particles)
                     particles = Instantiate(particlesPrefab, transform);
                 return particles;
             }
         }
 
+        private void StartEffect(Vector3 splitPos, float scale)
+        {
+            var particlesInst = Particles;
+            if (!particlesInst)
+                return;
+
+            var mainModule = particlesInst.main;
+            mainModule.startColor = liquidContainer.LiquidColor;
+
+            particlesInst.transform.localScale = Vector3.one * botleneckRadius * scale;
+            particlesInst.transform.position = splitPos;
+            particlesInst.Play();
+        }
         #endregion
 
         #region Botleneck
@@ -112,10 +131,16 @@ namespace UnitySimpleLiquid
 
         private void CheckSpliting()
         {
+            IsSpliting = false;
+
             if (liquidContainer == null)
                 return;
 
-            IsSpliting = false;
+            // Do we have something to split?
+            if (liquidContainer.FillAmountPercent <= 0f)
+                return;
+            if (!liquidContainer.IsOpen)
+                return;
 
             // Update botleneck and surface from last update
             bottleneckPlane = GenerateBotleneckPlane();
@@ -132,7 +157,7 @@ namespace UnitySimpleLiquid
                 overflowsPoint += liquidContainer.transform.position;
 
                 // Let's check if overflow point is inside botleneck radius
-                var botleneckPos = GenerateBotleneckPos();
+                botleneckPos = GenerateBotleneckPos();
                 var insideBotleneck = Vector3.Distance(overflowsPoint, botleneckPos) < botleneckRadius;
 
                 if (insideBotleneck)
@@ -170,8 +195,34 @@ namespace UnitySimpleLiquid
         private void SplitLogic(Vector3 splitPos)
         {
             IsSpliting = true;
+
+            // Check rotation of liquid container
+            // It conttolls how many liquid we lost and particles size
+            var howLow = Vector3.Dot(Vector3.up, liquidContainer.transform.up);
+            var lowMapped = 1f - (howLow + 1) * 0.5f + 0.2f;
+
+            var liquidStep = botleneckRadius * splitSpeed * Time.deltaTime * lowMapped;
+            var newLiquidAmmount = liquidContainer.FillAmountPercent - liquidStep;
+
+            // Check if amount is negative
+            if (newLiquidAmmount < 0f)
+            {
+                liquidStep = liquidContainer.FillAmountPercent;
+                newLiquidAmmount = 0f;
+            }
+
+            // Transfer liquid to other container (if possible)
+            liquidContainer.FillAmountPercent = newLiquidAmmount;
+            TransferLiquid(splitPos, liquidStep);
+
+            // Start particles effect
+            StartEffect(splitPos, lowMapped);
         }
 
+        private void TransferLiquid(Vector3 splitPos, float liquidStep)
+        {
+
+        }
         #endregion
 
         private void Update()

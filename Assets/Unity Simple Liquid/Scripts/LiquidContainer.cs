@@ -73,7 +73,10 @@ namespace UnitySimpleLiquid
             }
             set
             {
-                fillAmountPercent = value;
+                if (value > 0f)
+                    fillAmountPercent = value;
+                else
+                    fillAmountPercent = 0f;
                 UpdateSurfacePos();
             }
         }
