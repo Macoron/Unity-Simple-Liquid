@@ -13,8 +13,7 @@ namespace UnitySimpleLiquid
     [ExecuteInEditMode]
     public class LiquidContainer : MonoBehaviour
     {
-        [SerializeField]
-        private MeshRenderer liquidRender;
+        public MeshRenderer liquidRender;
         private MeshFilter meshFilter;
 
         [SerializeField]
