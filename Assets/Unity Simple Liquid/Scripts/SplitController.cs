@@ -127,6 +127,8 @@ namespace UnitySimpleLiquid
         #endregion
 
         #region Split Logic
+        private const float splashSize = 0.05f;
+
         public bool IsSpliting { get; private set; }
 
         private void CheckSpliting()
@@ -199,12 +201,12 @@ namespace UnitySimpleLiquid
             // Check rotation of liquid container
             // It conttolls how many liquid we lost and particles size
             var howLow = Vector3.Dot(Vector3.up, liquidContainer.transform.up);
-            var lowMapped = 1f - (howLow + 1) * 0.5f + 0.2f;
+            var flowScale = 1f - (howLow + 1) * 0.5f + 0.2f;
 
-            var liquidStep = botleneckRadius * splitSpeed * Time.deltaTime * lowMapped;
+            var liquidStep = botleneckRadius * splitSpeed * Time.deltaTime * flowScale;
             var newLiquidAmmount = liquidContainer.FillAmountPercent - liquidStep;
 
-            // Check if amount is negative
+            // Check if amount is negative and change it to zero
             if (newLiquidAmmount < 0f)
             {
                 liquidStep = liquidContainer.FillAmountPercent;
@@ -213,16 +215,44 @@ namespace UnitySimpleLiquid
 
             // Transfer liquid to other container (if possible)
             liquidContainer.FillAmountPercent = newLiquidAmmount;
-            TransferLiquid(splitPos, liquidStep);
+            TransferLiquid(splitPos, liquidStep, flowScale);
 
             // Start particles effect
-            StartEffect(splitPos, lowMapped);
+            StartEffect(splitPos, flowScale);
         }
 
-        private void TransferLiquid(Vector3 splitPos, float liquidStep)
+        private void TransferLiquid(Vector3 splitPos, float lostPercentAmount, float scale)
         {
+            var ray = new Ray(splitPos, Vector3.down);
 
+            // Check all colliders under ours
+            var hits = Physics.SphereCastAll(ray, splashSize);
+            hits = hits.OrderBy((h) => h.distance).ToArray();
+
+            foreach (var hit in hits)
+            {
+                // does it even a split controller
+                var liquid = hit.collider.GetComponent<SplitController>();
+                if (liquid && liquid != this)
+                {
+                    var otherBotleneck = liquid.GenerateBotleneckPos();
+                    var radius = liquid.botleneckRadius;
+
+                    var hitPoint = hit.point;
+
+                    // Does we touched botleneck?
+                    var insideRadius = Vector3.Distance(hitPoint, otherBotleneck) < radius + splashSize * scale;
+                    if (insideRadius)
+                    {
+                        var lostAmount = liquidContainer.Volume * lostPercentAmount;
+                        liquid.liquidContainer.FillAmount += lostAmount;
+                    }
+
+                    break;
+                }
+            }
         }
+
         #endregion
 
         private void Update()
