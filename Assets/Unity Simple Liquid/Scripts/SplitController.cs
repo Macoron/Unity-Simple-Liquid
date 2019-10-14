@@ -51,8 +51,9 @@ namespace UnitySimpleLiquid
         #endregion
 
         #region Botleneck
-        private Plane bottleneckPlane, surfacePlane;
-        private Vector3 botleneckPos;
+        public Plane bottleneckPlane { get; private set; }
+        public Plane surfacePlane { get; private set; }
+        public Vector3 BotleneckPos { get; private set; }
 
         private Plane GenerateBotleneckPlane()
         {
@@ -102,7 +103,7 @@ namespace UnitySimpleLiquid
             var worldPoints = new List<Vector3>();
             foreach (var locPoint in localPoints)
             {
-                var worldPoint = botleneckPos + containerOrientation * locPoint;
+                var worldPoint = BotleneckPos + containerOrientation * locPoint;
                 worldPoints.Add(worldPoint);
             }
 
@@ -144,10 +145,6 @@ namespace UnitySimpleLiquid
             if (!liquidContainer.IsOpen)
                 return;
 
-            // Update botleneck and surface from last update
-            bottleneckPlane = GenerateBotleneckPlane();
-            surfacePlane = liquidContainer.GenerateSurfacePlane();
-
             // Check if liquid is overflows
             Vector3 overflowsPoint, lineVec;
             var overflows = GeomUtils.PlanePlaneIntersection(out overflowsPoint, out lineVec,
@@ -159,8 +156,7 @@ namespace UnitySimpleLiquid
                 overflowsPoint += liquidContainer.transform.position;
 
                 // Let's check if overflow point is inside botleneck radius
-                botleneckPos = GenerateBotleneckPos();
-                var insideBotleneck = Vector3.Distance(overflowsPoint, botleneckPos) < botleneckRadius;
+                var insideBotleneck = Vector3.Distance(overflowsPoint, BotleneckPos) < botleneckRadius;
 
                 if (insideBotleneck)
                 {
@@ -168,14 +164,14 @@ namespace UnitySimpleLiquid
                     var minPoint = GenerateBotleneckLowesPoint();
                     SplitLogic(minPoint);
                 }
-                else if (botleneckPos.y < overflowsPoint.y)
+                else if (BotleneckPos.y < overflowsPoint.y)
                 {
                     // Oh, looks like container is upside down - let's check it
                     var dot = Vector3.Dot(bottleneckPlane.normal, surfacePlane.normal);
                     if (dot < 0f)
                     {
                         // Yep, let's split from the botleneck center
-                        SplitLogic(botleneckPos);
+                        SplitLogic(BotleneckPos);
                     }
                     else
                     {
@@ -257,6 +253,12 @@ namespace UnitySimpleLiquid
 
         private void Update()
         {
+            // Update botleneck and surface from last update
+            bottleneckPlane = GenerateBotleneckPlane();
+            BotleneckPos = GenerateBotleneckPos();
+            surfacePlane = liquidContainer.GenerateSurfacePlane();
+
+            // Now check spliting
             CheckSpliting();
         }
     }

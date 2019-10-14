@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1519625932346200664}
   - component: {fileID: 4290243747654017780}
+  - component: {fileID: 1849351744}
+  - component: {fileID: 1849351742}
   m_Layer: 0
   m_Name: Bottle
   m_TagString: Untagged
@@ -49,11 +51,42 @@ MonoBehaviour:
   liquidRender: {fileID: 8479694515570843939}
   liquidMaterial: {fileID: 2100000, guid: 8dec526bbd84d684da6f40f79c3ab1bd, type: 2}
   cap: {fileID: 7634469175278025645}
-  isOpen: 0
+  isOpen: 1
   inertness: 50
   liquidColor: {r: 0.1882353, g: 0.34948653, b: 0.5294118, a: 0.28627452}
-  fillAmountPercent: 0.66
+  fillAmountPercent: 0.653
   customVolume: 0
+--- !u!136 &1849351744
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2543850318960091211}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.100430764
+  m_Height: 0.44198456
+  m_Direction: 1
+  m_Center: {x: 0.0006372519, y: 0.23271824, z: 0.00000010751718}
+--- !u!114 &1849351742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2543850318960091211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb562255fca9b544b4583d4e7147e92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  liquidContainer: {fileID: 4290243747654017780}
+  botleneckRadius: 0.02
+  splitSpeed: 60
+  particlesPrefab: {fileID: 5157395080114985353, guid: 6cbd7c4436dcf4a709ab46f353a9d3c3,
+    type: 3}
 --- !u!1 &4368494120379776360
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,7 +182,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4010355648684805109
 Transform:
   m_ObjectHideFlags: 0

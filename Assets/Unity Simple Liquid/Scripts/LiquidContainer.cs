@@ -187,7 +187,10 @@ namespace UnitySimpleLiquid
             var min = bounds.min.y;
             var max = bounds.max.y;
 
-            var surface = MappedFillAmount * (max - min) + min;
+            var howLow = 1f - Mathf.Abs(Vector3.Dot(Vector3.up, transform.up));
+            var mapped = howLow * 0.1f;
+
+            var surface = (MappedFillAmount + mapped * (1f - MappedFillAmount)) * (max - min) + min;
             var center = bounds.center;
             center.y = surface;
 

@@ -88,6 +88,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8191323892244427148}
   - component: {fileID: 8296172667356064988}
+  - component: {fileID: 1222170062}
+  - component: {fileID: 1222170061}
   m_Layer: 0
   m_Name: Glass
   m_TagString: Untagged
@@ -104,7 +106,7 @@ Transform:
   m_GameObject: {fileID: 5185389706047701919}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.138, z: 0}
-  m_LocalScale: {x: 0.5211664, y: 0.5211664, z: 0.5211664}
+  m_LocalScale: {x: 0.50822, y: 0.50822, z: 0.50822}
   m_Children:
   - {fileID: 1601175883211743740}
   - {fileID: 3241803590354836021}
@@ -129,8 +131,38 @@ MonoBehaviour:
   isOpen: 1
   inertness: 50
   liquidColor: {r: 0.3679245, g: 0.14582516, b: 0.09545212, a: 0.4117647}
-  fillAmountPercent: 0.621
+  fillAmountPercent: 0.491
   customVolume: 0
+--- !u!65 &1222170062
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5185389706047701919}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.16000001, y: 0.192807, z: 0.16}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1222170061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5185389706047701919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb562255fca9b544b4583d4e7147e92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  liquidContainer: {fileID: 8296172667356064988}
+  botleneckRadius: 0.04
+  splitSpeed: 40
+  particlesPrefab: {fileID: 5157395080114985353, guid: 6cbd7c4436dcf4a709ab46f353a9d3c3,
+    type: 3}
 --- !u!1 &5222405182016459952
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,7 +8,6 @@ namespace UnitySimpleLiquid
     {
         /// <summary>
         /// Checks interesection of two planes
-        /// https://forum.unity.com/threads/how-to-find-line-of-intersecting-planes.109458/#post-725977
         /// </summary>
         /// <param name="linePoint">Point on the intersection line</param>
         /// <param name="lineVec">Intersection direction</param>
@@ -17,6 +16,8 @@ namespace UnitySimpleLiquid
         /// <returns></returns>
         public static bool PlanePlaneIntersection(out Vector3 linePoint, out Vector3 lineVec, Plane plane1, Plane plane2)
         {
+            // https://forum.unity.com/threads/how-to-find-line-of-intersecting-planes.109458/#post-725977
+
             linePoint = Vector3.zero;
             lineVec = Vector3.zero;
 
@@ -41,6 +42,21 @@ namespace UnitySimpleLiquid
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Map function to other scale
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="in_min"></param>
+        /// <param name="in_max"></param>
+        /// <param name="out_min"></param>
+        /// <param name="out_max"></param>
+        /// <returns></returns>
+        public static float Map(float x, float in_min, float in_max, float out_min, float out_max)
+        {
+            // https://forum.unity.com/threads/mapping-or-scaling-values-to-a-new-range.180090/#post-2241099
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
     }
 }
