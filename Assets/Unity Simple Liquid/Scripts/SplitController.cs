@@ -13,7 +13,10 @@ namespace UnitySimpleLiquid
     public class SplitController : MonoBehaviour
     {
         public LiquidContainer liquidContainer;
-        public float botleneckRadius = 0.1f;
+        [SerializeField]
+        private float botleneckRadius = 0.1f;
+        public float BotleneckRadiusWorld { get; private set; }
+
 
         [Tooltip("How fast liquid split from container")]
         public float splitSpeed = 2f;
@@ -44,7 +47,7 @@ namespace UnitySimpleLiquid
             var mainModule = particlesInst.main;
             mainModule.startColor = liquidContainer.LiquidColor;
 
-            particlesInst.transform.localScale = Vector3.one * botleneckRadius * scale;
+            particlesInst.transform.localScale = Vector3.one * BotleneckRadiusWorld * scale;
             particlesInst.transform.position = splitPos;
             particlesInst.Play();
         }
@@ -93,8 +96,8 @@ namespace UnitySimpleLiquid
             var localPoints = new List<Vector3>();
             for (float a = 0; a < Mathf.PI * 2f; a += angleStep)
             {
-                var x = botleneckRadius * Mathf.Cos(a);
-                var z = botleneckRadius * Mathf.Sin(a);
+                var x = BotleneckRadiusWorld * Mathf.Cos(a);
+                var z = BotleneckRadiusWorld * Mathf.Sin(a);
 
                 localPoints.Add(new Vector3(x, 0, z));
             }
@@ -119,16 +122,18 @@ namespace UnitySimpleLiquid
         {
             // Draws bottleneck direction and radius
             var bottleneckPlane = GenerateBotleneckPlane();
+            BotleneckRadiusWorld = botleneckRadius * transform.lossyScale.magnitude;
+
             Gizmos.color = Color.red;
             GizmosHelper.DrawPlaneGizmos(bottleneckPlane, transform);
 
             // And bottleneck position
-            GizmosHelper.DrawSphereOnPlane(bottleneckPlane, botleneckRadius, transform);
+            GizmosHelper.DrawSphereOnPlane(bottleneckPlane, BotleneckRadiusWorld, transform);
         }
         #endregion
 
         #region Split Logic
-        private const float splashSize = 0.05f;
+        private const float splashSize = 0.025f;
 
         public bool IsSpliting { get; private set; }
 
@@ -156,7 +161,7 @@ namespace UnitySimpleLiquid
                 overflowsPoint += liquidContainer.transform.position;
 
                 // Let's check if overflow point is inside botleneck radius
-                var insideBotleneck = Vector3.Distance(overflowsPoint, BotleneckPos) < botleneckRadius;
+                var insideBotleneck = Vector3.Distance(overflowsPoint, BotleneckPos) < BotleneckRadiusWorld;
 
                 if (insideBotleneck)
                 {
@@ -199,7 +204,7 @@ namespace UnitySimpleLiquid
             var howLow = Vector3.Dot(Vector3.up, liquidContainer.transform.up);
             var flowScale = 1f - (howLow + 1) * 0.5f + 0.2f;
 
-            var liquidStep = botleneckRadius * splitSpeed * Time.deltaTime * flowScale;
+            var liquidStep = BotleneckRadiusWorld * splitSpeed * Time.deltaTime * flowScale;
             var newLiquidAmmount = liquidContainer.FillAmountPercent - liquidStep;
 
             // Check if amount is negative and change it to zero
@@ -232,7 +237,7 @@ namespace UnitySimpleLiquid
                 if (liquid && liquid != this)
                 {
                     var otherBotleneck = liquid.GenerateBotleneckPos();
-                    var radius = liquid.botleneckRadius;
+                    var radius = liquid.BotleneckRadiusWorld;
 
                     var hitPoint = hit.point;
 
@@ -257,6 +262,8 @@ namespace UnitySimpleLiquid
             bottleneckPlane = GenerateBotleneckPlane();
             BotleneckPos = GenerateBotleneckPos();
             surfacePlane = liquidContainer.GenerateSurfacePlane();
+            BotleneckRadiusWorld = botleneckRadius * transform.lossyScale.magnitude;
+
 
             // Now check spliting
             CheckSpliting();
