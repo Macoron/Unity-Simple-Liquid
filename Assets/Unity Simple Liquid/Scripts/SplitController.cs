@@ -155,11 +155,11 @@ namespace UnitySimpleLiquid
             var overflows = GeomUtils.PlanePlaneIntersection(out overflowsPoint, out lineVec,
                 bottleneckPlane, surfacePlane);
 
+            // Translate to contrainers world position
+            overflowsPoint += liquidContainer.transform.position;
+
             if (overflows)
             {
-                // Translate to contrainers world position
-                overflowsPoint += liquidContainer.transform.position;
-
                 // Let's check if overflow point is inside botleneck radius
                 var insideBotleneck = Vector3.Distance(overflowsPoint, BotleneckPos) < BotleneckRadiusWorld;
 
@@ -168,28 +168,30 @@ namespace UnitySimpleLiquid
                     // We are inside botleneck - just start spliting from lowest botleneck point
                     var minPoint = GenerateBotleneckLowesPoint();
                     SplitLogic(minPoint);
+                    return;
                 }
-                else if (BotleneckPos.y < overflowsPoint.y)
-                {
-                    // Oh, looks like container is upside down - let's check it
-                    var dot = Vector3.Dot(bottleneckPlane.normal, surfacePlane.normal);
-                    if (dot < 0f)
-                    {
-                        // Yep, let's split from the botleneck center
-                        SplitLogic(BotleneckPos);
-                    }
-                    else
-                    {
-                        // Well, this weird, let's check if spliting point is even inside our liquid
-                        var dist = liquidContainer.liquidRender.bounds.SqrDistance(overflowsPoint);
-                        var inBounding = dist < 0.0001f;
+            }
 
-                        if (inBounding)
-                        {
-                            // Yeah, we are inside liquid container
-                            var minPoint = GenerateBotleneckLowesPoint();
-                            SplitLogic(minPoint);
-                        }
+            if (BotleneckPos.y < overflowsPoint.y)
+            {
+                // Oh, looks like container is upside down - let's check it
+                var dot = Vector3.Dot(bottleneckPlane.normal, surfacePlane.normal);
+                if (dot < 0f)
+                {
+                    // Yep, let's split from the botleneck center
+                    SplitLogic(BotleneckPos);
+                }
+                else
+                {
+                    // Well, this weird, let's check if spliting point is even inside our liquid
+                    var dist = liquidContainer.liquidRender.bounds.SqrDistance(overflowsPoint);
+                    var inBounding = dist < 0.0001f;
+
+                    if (inBounding)
+                    {
+                        // Yeah, we are inside liquid container
+                        var minPoint = GenerateBotleneckLowesPoint();
+                        SplitLogic(minPoint);
                     }
                 }
             }
