@@ -14,8 +14,8 @@ namespace UnitySimpleLiquid
     {
         public LiquidContainer liquidContainer;
         [SerializeField]
-        private float botleneckRadius = 0.1f;
-        public float BotleneckRadiusWorld { get; private set; }
+        private float bottleneckRadius = 0.1f;
+        public float BottleneckRadiusWorld { get; private set; }
 
 
         [Tooltip("How fast liquid split from container")]
@@ -47,18 +47,18 @@ namespace UnitySimpleLiquid
             var mainModule = particlesInst.main;
             mainModule.startColor = liquidContainer.LiquidColor;
 
-            particlesInst.transform.localScale = Vector3.one * BotleneckRadiusWorld * scale;
+            particlesInst.transform.localScale = Vector3.one * BottleneckRadiusWorld * scale;
             particlesInst.transform.position = splitPos;
             particlesInst.Play();
         }
         #endregion
 
-        #region Botleneck
+        #region Bottleneck
         public Plane bottleneckPlane { get; private set; }
         public Plane surfacePlane { get; private set; }
-        public Vector3 BotleneckPos { get; private set; }
+        public Vector3 BottleneckPos { get; private set; }
 
-        private Plane GenerateBotleneckPlane()
+        private Plane GenerateBottleneckPlane()
         {
             if (!liquidContainer)
                 return new Plane();
@@ -72,7 +72,7 @@ namespace UnitySimpleLiquid
                 max * liquidContainer.transform.lossyScale.y);
         }
 
-        private Vector3 GenerateBotleneckPos()
+        private Vector3 GenerateBottleneckPos()
         {
             if (!liquidContainer)
                 return Vector3.zero;
@@ -82,7 +82,7 @@ namespace UnitySimpleLiquid
             return pos;
         }
 
-        private Vector3 GenerateBotleneckLowesPoint()
+        private Vector3 GenerateBottleneckLowesPoint()
         {
             if (!liquidContainer)
                 return Vector3.zero;
@@ -96,8 +96,8 @@ namespace UnitySimpleLiquid
             var localPoints = new List<Vector3>();
             for (float a = 0; a < Mathf.PI * 2f; a += angleStep)
             {
-                var x = BotleneckRadiusWorld * Mathf.Cos(a);
-                var z = BotleneckRadiusWorld * Mathf.Sin(a);
+                var x = BottleneckRadiusWorld * Mathf.Cos(a);
+                var z = BottleneckRadiusWorld * Mathf.Sin(a);
 
                 localPoints.Add(new Vector3(x, 0, z));
             }
@@ -106,7 +106,7 @@ namespace UnitySimpleLiquid
             var worldPoints = new List<Vector3>();
             foreach (var locPoint in localPoints)
             {
-                var worldPoint = BotleneckPos + containerOrientation * locPoint;
+                var worldPoint = BottleneckPos + containerOrientation * locPoint;
                 worldPoints.Add(worldPoint);
             }
 
@@ -121,19 +121,28 @@ namespace UnitySimpleLiquid
         private void OnDrawGizmosSelected()
         {
             // Draws bottleneck direction and radius
-            var bottleneckPlane = GenerateBotleneckPlane();
-            BotleneckRadiusWorld = botleneckRadius * transform.lossyScale.magnitude;
+            var bottleneckPlane = GenerateBottleneckPlane();
+            BottleneckRadiusWorld = bottleneckRadius * transform.lossyScale.magnitude;
 
             Gizmos.color = Color.red;
             GizmosHelper.DrawPlaneGizmos(bottleneckPlane, transform);
 
             // And bottleneck position
-            GizmosHelper.DrawSphereOnPlane(bottleneckPlane, BotleneckRadiusWorld, transform);
-        }
-        #endregion
+            GizmosHelper.DrawSphereOnPlane(bottleneckPlane, BottleneckRadiusWorld, transform);
 
-        #region Split Logic
-        private const float splashSize = 0.025f;
+			///
+			
+		}
+		void OnDrawGizmos()
+		{
+			// Draw a yellow sphere at the transform's position
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawSphere(raycasthit, 0.01f);
+		}
+		#endregion
+
+		#region Split Logic
+		private const float splashSize = 0.025f;
 
         public bool IsSpliting { get; private set; }
 
@@ -160,26 +169,26 @@ namespace UnitySimpleLiquid
 
             if (overflows)
             {
-                // Let's check if overflow point is inside botleneck radius
-                var insideBotleneck = Vector3.Distance(overflowsPoint, BotleneckPos) < BotleneckRadiusWorld;
+                // Let's check if overflow point is inside bottleneck radius
+                var insideBottleneck = Vector3.Distance(overflowsPoint, BottleneckPos) < BottleneckRadiusWorld;
 
-                if (insideBotleneck)
+                if (insideBottleneck)
                 {
-                    // We are inside botleneck - just start spliting from lowest botleneck point
-                    var minPoint = GenerateBotleneckLowesPoint();
+                    // We are inside bottleneck - just start spliting from lowest bottleneck point
+                    var minPoint = GenerateBottleneckLowesPoint();
                     SplitLogic(minPoint);
                     return;
                 }
             }
 
-            if (BotleneckPos.y < overflowsPoint.y)
+            if (BottleneckPos.y < overflowsPoint.y)
             {
                 // Oh, looks like container is upside down - let's check it
                 var dot = Vector3.Dot(bottleneckPlane.normal, surfacePlane.normal);
                 if (dot < 0f)
                 {
-                    // Yep, let's split from the botleneck center
-                    SplitLogic(BotleneckPos);
+                    // Yep, let's split from the bottleneck center
+                    SplitLogic(BottleneckPos);
                 }
                 else
                 {
@@ -190,7 +199,7 @@ namespace UnitySimpleLiquid
                     if (inBounding)
                     {
                         // Yeah, we are inside liquid container
-                        var minPoint = GenerateBotleneckLowesPoint();
+                        var minPoint = GenerateBottleneckLowesPoint();
                         SplitLogic(minPoint);
                     }
                 }
@@ -206,7 +215,7 @@ namespace UnitySimpleLiquid
             var howLow = Vector3.Dot(Vector3.up, liquidContainer.transform.up);
             var flowScale = 1f - (howLow + 1) * 0.5f + 0.2f;
 
-            var liquidStep = BotleneckRadiusWorld * splitSpeed * Time.deltaTime * flowScale;
+            var liquidStep = BottleneckRadiusWorld * splitSpeed * Time.deltaTime * flowScale;
             var newLiquidAmmount = liquidContainer.FillAmountPercent - liquidStep;
 
             // Check if amount is negative and change it to zero
@@ -218,13 +227,21 @@ namespace UnitySimpleLiquid
 
             // Transfer liquid to other container (if possible)
             liquidContainer.FillAmountPercent = newLiquidAmmount;
-            TransferLiquid(splitPos, liquidStep, flowScale);
+			//If liquid has to run down the side of another object, a new vector is returned with the position to start the particles
+            Vector3 possibleNewEdge = TransferLiquid(splitPos, liquidStep, flowScale, this.gameObject);
 
-            // Start particles effect
-            StartEffect(splitPos, flowScale);
+			// Start particles effect
+			if (possibleNewEdge != Vector3.zero)
+			{
+				StartEffect(possibleNewEdge, flowScale);
+			} else
+			{
+				StartEffect(splitPos, flowScale);
+			}
         }
 
-        private void TransferLiquid(Vector3 splitPos, float lostPercentAmount, float scale)
+		public Vector3 raycasthit;
+        private Vector3 TransferLiquid(Vector3 splitPos, float lostPercentAmount, float scale, GameObject ignoreCollision)
         {
             var ray = new Ray(splitPos, Vector3.down);
 
@@ -234,37 +251,103 @@ namespace UnitySimpleLiquid
 
             foreach (var hit in hits)
             {
-                // does it even a split controller
-                var liquid = hit.collider.GetComponent<SplitController>();
-                if (liquid && liquid != this)
-                {
-                    var otherBotleneck = liquid.GenerateBotleneckPos();
-                    var radius = liquid.BotleneckRadiusWorld;
+				Debug.Log("Hit: " + hit.collider.transform.name);
+				//Ignore ourself
+				if (!GameObject.ReferenceEquals(hit.collider.gameObject, ignoreCollision))
+				{
+					
+					// does it even a split controller
+					var liquid = hit.collider.GetComponent<SplitController>();
+					if (liquid && liquid != this)
+					{
+						var otherBottleneck = liquid.GenerateBottleneckPos();
+						var radius = liquid.BottleneckRadiusWorld;
 
-                    var hitPoint = hit.point;
+						var hitPoint = hit.point;
 
-                    // Does we touched botleneck?
-                    var insideRadius = Vector3.Distance(hitPoint, otherBotleneck) < radius + splashSize * scale;
-                    if (insideRadius)
-                    {
-                        var lostAmount = liquidContainer.Volume * lostPercentAmount;
-                        liquid.liquidContainer.FillAmount += lostAmount;
-                    }
+						// Does we touched bottleneck?
+						var insideRadius = Vector3.Distance(hitPoint, otherBottleneck) < radius + splashSize * scale;
+						if (insideRadius)
+						{
+							var lostAmount = liquidContainer.Volume * lostPercentAmount;
+							liquid.liquidContainer.FillAmount += lostAmount;
+						}
 
-                    break;
-                }
+						break;
+					}
+
+
+					//Something other than a liquid splitter is in the way
+					if (!liquid)
+					{
+						//Simulate the liquid running off an object it hits and continuing down from the edge of the liquid
+						//Does not take velocity into account
+
+						///First get the slope direction
+						Vector3 slope = GetSlopeDirection(Vector3.up, hit.normal);
+
+						//Next we try to find the edge of the object the liquid would roll off
+						//This really only works for primitive objects, it would look weird on other stuff
+						Vector3 edgePosition = TryGetSlopeEdge(slope, hit);
+						if (edgePosition != Vector3.zero)
+						{
+							//edge position found, surface must be tilted
+							//Now we can try to transfer the liquid from this position
+							return TransferLiquid(edgePosition, lostPercentAmount, scale,hit.collider.gameObject);
+							
+						}
+						break;
+					}
+				}
             }
+			return Vector3.zero;
         }
+		
+		#endregion
 
-        #endregion
+		private Vector3 GetSlopeDirection(Vector3 up, Vector3 normal)
+		{
+			https://forum.unity.com/threads/making-a-player-slide-down-a-slope.469988/#post-3062204			
+			return Vector3.Cross(Vector3.Cross(up, normal), normal);
+		}
 
-        private void Update()
+		private Vector3 TryGetSlopeEdge(Vector3 slope, RaycastHit hit)
+		{
+			Vector3 edgePosition = Vector3.zero;
+			
+			GameObject objHit = hit.collider.gameObject;
+
+			//flip a raycast so it faces backwards towards the object we hit, move it slightly down so it will hit the edge of the object
+			Vector3 moveDown = new Vector3(0f, -0.0001f, 0f);
+			Vector3 reverseRayPos = hit.point + moveDown + (slope.normalized);
+
+			Debug.DrawRay(reverseRayPos, -slope.normalized, Color.blue);
+
+			Ray backwardsRay = new Ray(reverseRayPos, -slope.normalized);
+
+			RaycastHit[] revHits = Physics.RaycastAll(backwardsRay);
+
+			foreach (var revHit in revHits)
+			{
+				// https://answers.unity.com/questions/752382/how-to-compare-if-two-gameobjects-are-the-same-1.html
+				//We only want to get this position on the original object we hit off of
+				if (GameObject.ReferenceEquals(revHit.collider.gameObject, objHit))
+				{
+					//We hit the object the liquid is running down!
+					raycasthit = edgePosition = revHit.point;
+					break;
+				}
+			}
+			return edgePosition;
+		}
+
+		private void Update()
         {
-            // Update botleneck and surface from last update
-            bottleneckPlane = GenerateBotleneckPlane();
-            BotleneckPos = GenerateBotleneckPos();
+            // Update bottleneck and surface from last update
+            bottleneckPlane = GenerateBottleneckPlane();
+            BottleneckPos = GenerateBottleneckPos();
             surfacePlane = liquidContainer.GenerateSurfacePlane();
-            BotleneckRadiusWorld = botleneckRadius * transform.lossyScale.magnitude;
+            BottleneckRadiusWorld = bottleneckRadius * transform.lossyScale.magnitude;
 
 
             // Now check spliting
