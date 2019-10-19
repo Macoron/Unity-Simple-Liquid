@@ -227,21 +227,14 @@ namespace UnitySimpleLiquid
 
             // Transfer liquid to other container (if possible)
             liquidContainer.FillAmountPercent = newLiquidAmmount;
-			//If liquid has to run down the side of another object, a new vector is returned with the position to start the particles
-            Vector3 possibleNewEdge = TransferLiquid(splitPos, liquidStep, flowScale, this.gameObject);
+            TransferLiquid(splitPos, liquidStep, flowScale, this.gameObject);
 
-			// Start particles effect
-			if (possibleNewEdge != Vector3.zero)
-			{
-				StartEffect(possibleNewEdge, flowScale);
-			} else
-			{
-				StartEffect(splitPos, flowScale);
-			}
+            // Start particles effect
+            StartEffect(splitPos, flowScale);
         }
 
 		public Vector3 raycasthit;
-        private Vector3 TransferLiquid(Vector3 splitPos, float lostPercentAmount, float scale, GameObject ignoreCollision)
+        private void TransferLiquid(Vector3 splitPos, float lostPercentAmount, float scale, GameObject ignoreCollision)
         {
             var ray = new Ray(splitPos, Vector3.down);
 
@@ -250,8 +243,7 @@ namespace UnitySimpleLiquid
             hits = hits.OrderBy((h) => h.distance).ToArray();
 
             foreach (var hit in hits)
-            {
-				Debug.Log("Hit: " + hit.collider.transform.name);
+            {				
 				//Ignore ourself
 				if (!GameObject.ReferenceEquals(hit.collider.gameObject, ignoreCollision))
 				{
@@ -293,14 +285,13 @@ namespace UnitySimpleLiquid
 						{
 							//edge position found, surface must be tilted
 							//Now we can try to transfer the liquid from this position
-							return TransferLiquid(edgePosition, lostPercentAmount, scale,hit.collider.gameObject);
+							TransferLiquid(edgePosition, lostPercentAmount, scale,hit.collider.gameObject);
 							
 						}
 						break;
 					}
 				}
             }
-			return Vector3.zero;
         }
 		
 		#endregion
@@ -320,8 +311,6 @@ namespace UnitySimpleLiquid
 			//flip a raycast so it faces backwards towards the object we hit, move it slightly down so it will hit the edge of the object
 			Vector3 moveDown = new Vector3(0f, -0.0001f, 0f);
 			Vector3 reverseRayPos = hit.point + moveDown + (slope.normalized);
-
-			Debug.DrawRay(reverseRayPos, -slope.normalized, Color.blue);
 
 			Ray backwardsRay = new Ray(reverseRayPos, -slope.normalized);
 
