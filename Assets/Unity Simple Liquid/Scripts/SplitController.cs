@@ -245,7 +245,7 @@ namespace UnitySimpleLiquid
             foreach (var hit in hits)
             {				
 				//Ignore ourself
-				if (!GameObject.ReferenceEquals(hit.collider.gameObject, ignoreCollision))
+				if (!GameObject.ReferenceEquals(hit.collider.gameObject, ignoreCollision) && !hit.collider.isTrigger)
 				{
 					
 					// does it even a split controller
