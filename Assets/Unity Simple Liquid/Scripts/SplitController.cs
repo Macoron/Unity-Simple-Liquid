@@ -233,7 +233,9 @@ namespace UnitySimpleLiquid
             StartEffect(splitPos, flowScale);
         }
 
-		public Vector3 raycasthit;
+		//Used for Gizmo only
+		private Vector3 raycasthit;
+
         private void TransferLiquid(Vector3 splitPos, float lostPercentAmount, float scale, GameObject ignoreCollision)
         {
             var ray = new Ray(splitPos, Vector3.down);
