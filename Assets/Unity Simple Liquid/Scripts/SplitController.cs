@@ -130,16 +130,16 @@ namespace UnitySimpleLiquid
             GizmosHelper.DrawPlaneGizmos(bottleneckPlane, transform);
 
             // And bottleneck position
-            GizmosHelper.DrawSphereOnPlane(bottleneckPlane, BottleneckRadiusWorld, transform);
-
-			///
-			
+            GizmosHelper.DrawSphereOnPlane(bottleneckPlane, BottleneckRadiusWorld, transform);			
 		}
-		void OnDrawGizmos()
+		private void OnDrawGizmos()
 		{
 			// Draw a yellow sphere at the transform's position
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawSphere(raycasthit, 0.01f);
+            if (raycasthit != Vector3.zero)
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawSphere(raycasthit, 0.01f);
+            }
 		}
 		#endregion
 
@@ -326,11 +326,12 @@ namespace UnitySimpleLiquid
 			return new RaycastHit();
 		}
 
-		#endregion
+        #endregion
 
-		private Vector3 GetSlopeDirection(Vector3 up, Vector3 normal)
+        #region Slope Logic
+        private Vector3 GetSlopeDirection(Vector3 up, Vector3 normal)
 		{
-			https://forum.unity.com/threads/making-a-player-slide-down-a-slope.469988/#post-3062204			
+			//https://forum.unity.com/threads/making-a-player-slide-down-a-slope.469988/#post-3062204			
 			return Vector3.Cross(Vector3.Cross(up, normal), normal);
 		}
 
@@ -361,15 +362,15 @@ namespace UnitySimpleLiquid
 			}
 			return edgePosition;
 		}
+        #endregion
 
-		private void Update()
+        private void Update()
         {
             // Update bottleneck and surface from last update
             bottleneckPlane = GenerateBottleneckPlane();
             BottleneckPos = GenerateBottleneckPos();
             surfacePlane = liquidContainer.GenerateSurfacePlane();
             BottleneckRadiusWorld = bottleneckRadius * transform.lossyScale.magnitude;
-
 
 			// Now check spliting, starting from the top
 			currentDrop = 0;
