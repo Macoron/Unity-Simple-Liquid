@@ -85,6 +85,7 @@ MonoBehaviour:
   liquidContainer: {fileID: 4290243747654017780}
   bottleneckRadius: 0.02
   splitSpeed: 60
+  maxEdgeDrops: 4
   particlesPrefab: {fileID: 5157395080114985353, guid: 6cbd7c4436dcf4a709ab46f353a9d3c3,
     type: 3}
 --- !u!1 &4368494120379776360
