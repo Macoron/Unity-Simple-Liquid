@@ -295,7 +295,7 @@ namespace UnitySimpleLiquid
 					if (!liquid)
 					{
 						//If we have already dropped down off too many objects, break
-						Debug.Log("currentDrop: " + currentDrop);
+						
 						if (currentDrop >= maxEdgeDrops)
 						{
 							//if we have rolled down too many objects, return empty hit
