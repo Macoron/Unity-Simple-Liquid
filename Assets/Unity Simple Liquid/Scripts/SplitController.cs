@@ -139,7 +139,8 @@ namespace UnitySimpleLiquid
             {
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawSphere(raycasthit, 0.01f);
-            }
+				Gizmos.DrawSphere(raycastStart, 0.01f);
+			}
 		}
 		#endregion
 
@@ -245,6 +246,7 @@ namespace UnitySimpleLiquid
 
 		//Used for Gizmo only
 		private Vector3 raycasthit;
+		private Vector3 raycastStart;
 
 		private void TransferLiquid(RaycastHit hit, float lostPercentAmount, float scale)
         {
@@ -326,34 +328,52 @@ namespace UnitySimpleLiquid
 			return new RaycastHit();
 		}
 
-        #endregion
+		#endregion
 
-        #region Slope Logic
-        private Vector3 GetSlopeDirection(Vector3 up, Vector3 normal)
+		#region Slope Logic
+		private float GetIdealRayCastDist(Bounds boundBox, Vector3 point, Vector3 slope)
+		{
+			Vector3 final = boundBox.min;
+
+			// X axis	
+			if (slope.x > 0)
+				final.x = boundBox.max.x;
+			// Y axis	
+			if (slope.y > 0)
+				final.y = boundBox.max.y;
+			// Z axis
+			if (slope.z > 0)
+				final.z = boundBox.max.z;
+
+			return Vector3.Distance(point, final);
+		}
+
+		private Vector3 GetSlopeDirection(Vector3 up, Vector3 normal)
 		{
 			//https://forum.unity.com/threads/making-a-player-slide-down-a-slope.469988/#post-3062204			
-			return Vector3.Cross(Vector3.Cross(up, normal), normal);
+			return Vector3.Cross(Vector3.Cross(up, normal), normal).normalized;
 		}
 
 		private Vector3 TryGetSlopeEdge(Vector3 slope, RaycastHit hit)
 		{
 			Vector3 edgePosition = Vector3.zero;
-			
-			GameObject objHit = hit.collider.gameObject;
 
-			//flip a raycast so it faces backwards towards the object we hit, move it slightly down so it will hit the edge of the object
+			// We need to pick a position outside of the object to raycast back towards it to find an edge.
+			// We need a position slightly down so it will hit the edge of the object
 			Vector3 moveDown = new Vector3(0f, -0.0001f, 0f);
-			Vector3 reverseRayPos = hit.point + moveDown + (slope.normalized);
+			// We also need to move the position outside of the objects bounding box, so we actually hit it
+			float dist = GetIdealRayCastDist(hit.collider.bounds, hit.point, slope);
 
-			Ray backwardsRay = new Ray(reverseRayPos, -slope.normalized);
-
+			Vector3 reverseRayPos = hit.point + moveDown + (slope * dist);
+			raycastStart = reverseRayPos;
+			Ray backwardsRay = new Ray(reverseRayPos, -slope);
 			RaycastHit[] revHits = Physics.RaycastAll(backwardsRay);
 
 			foreach (var revHit in revHits)
 			{
 				// https://answers.unity.com/questions/752382/how-to-compare-if-two-gameobjects-are-the-same-1.html
 				//We only want to get this position on the original object we hit off of
-				if (GameObject.ReferenceEquals(revHit.collider.gameObject, objHit))
+				if (GameObject.ReferenceEquals(revHit.collider.gameObject, hit.collider.gameObject))
 				{
 					//We hit the object the liquid is running down!
 					raycasthit = edgePosition = revHit.point;
@@ -362,9 +382,9 @@ namespace UnitySimpleLiquid
 			}
 			return edgePosition;
 		}
-        #endregion
+		#endregion
 
-        private void Update()
+		private void Update()
         {
             // Update bottleneck and surface from last update
             bottleneckPlane = GenerateBottleneckPlane();
