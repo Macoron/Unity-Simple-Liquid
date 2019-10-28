@@ -84,43 +84,25 @@ namespace UnitySimpleLiquid
             return pos;
         }
 
-        private Vector3 GenerateBottleneckLowesPoint()
-        {
-            if (!liquidContainer)
-                return Vector3.zero;
+		private Vector3 GenerateBottleneckLowesPoint()
+		{
+			if (!liquidContainer)
+				return Vector3.zero;
 
-            // TODO: This code is not optimal and can be done much better
-            // Righ now it caluclates minimal point of the circle (in 3d) by brute force
-            var containerOrientation = liquidContainer.transform.rotation;
+			// Calculate the direction vector of the bottlenecks slope
 
-            // Points on bottleneck radius (local space)
-            var angleStep = 0.1f;
-            var localPoints = new List<Vector3>();
-            for (float a = 0; a < Mathf.PI * 2f; a += angleStep)
-            {
-                var x = BottleneckRadiusWorld * Mathf.Cos(a);
-                var z = BottleneckRadiusWorld * Mathf.Sin(a);
+			Vector3 bottleneckSlope = GetSlopeDirection(Vector3.up, bottleneckPlane.normal);
 
-                localPoints.Add(new Vector3(x, 0, z));
-            }
+			// Find a position along the slope the side of the bottleneck radius
+			Vector3 min = BottleneckPos + bottleneckSlope * BottleneckRadiusWorld;
 
-            // Transfer points from local to global
-            var worldPoints = new List<Vector3>();
-            foreach (var locPoint in localPoints)
-            {
-                var worldPoint = BottleneckPos + containerOrientation * locPoint;
-                worldPoints.Add(worldPoint);
-            }
+			return min;
 
-            // Find the lowest one
-            var min = worldPoints.OrderBy((pt) => pt.y).First();
-            return min;
+		}
+		#endregion
 
-        }
-        #endregion
-
-        #region Gizmos
-        private void OnDrawGizmosSelected()
+		#region Gizmos
+		private void OnDrawGizmosSelected()
         {
             // Draws bottleneck direction and radius
             var bottleneckPlane = GenerateBottleneckPlane();
