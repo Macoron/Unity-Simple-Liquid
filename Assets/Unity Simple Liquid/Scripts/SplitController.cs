@@ -269,9 +269,10 @@ namespace UnitySimpleLiquid
 					var liquid = hit.collider.GetComponent<SplitController>();
 					if (liquid && liquid != this)
 					{
-						
+						//color change in capacity
+						SendLiquidContainer(hit.collider.gameObject);
+
 						return hit;
-						
 					}
 
 
@@ -310,6 +311,17 @@ namespace UnitySimpleLiquid
 			return new RaycastHit();
 		}
 
+		#endregion
+
+		#region ChangeColor
+		private void SendLiquidContainer(GameObject go)
+		{
+			LiquidContainer lc = go.GetComponent<LiquidContainer>();
+			if (!lc)
+				return;
+			//keep the liquidContainer in the list
+			lc.GetColorList.Add(liquidContainer);
+		}
 		#endregion
 
 		#region Slope Logic
