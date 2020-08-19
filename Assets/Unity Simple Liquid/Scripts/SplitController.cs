@@ -245,6 +245,9 @@ namespace UnitySimpleLiquid
 			{
 				var lostAmount = liquidContainer.Volume * lostPercentAmount;
 				liquid.liquidContainer.FillAmount += lostAmount;
+
+				//color change in capacity
+				SendLiquidContainer(hit.collider.gameObject);
 			}
 
 			
@@ -269,8 +272,7 @@ namespace UnitySimpleLiquid
 					var liquid = hit.collider.GetComponent<SplitController>();
 					if (liquid && liquid != this)
 					{
-						//color change in capacity
-						SendLiquidContainer(hit.collider.gameObject);
+
 
 						return hit;
 					}
