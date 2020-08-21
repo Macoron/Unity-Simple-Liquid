@@ -247,7 +247,7 @@ namespace UnitySimpleLiquid
 				liquid.liquidContainer.FillAmount += lostAmount;
 
 				//color change in capacity
-				SendLiquidContainer(hit.collider.gameObject);
+				SendLiquidContainer(liquid.liquidContainer);
 			}
 
 			
@@ -316,11 +316,8 @@ namespace UnitySimpleLiquid
 		#endregion
 
 		#region ChangeColor
-		private void SendLiquidContainer(GameObject go)
+		private void SendLiquidContainer(LiquidContainer lc)
 		{
-			LiquidContainer lc = go.GetComponent<LiquidContainer>();
-			if (!lc)
-				return;
 			//keep the liquidContainer in the list
 			lc.GetColorList.Add(liquidContainer);
 		}
