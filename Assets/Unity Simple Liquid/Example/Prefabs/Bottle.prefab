@@ -88,6 +88,7 @@ MonoBehaviour:
   maxEdgeDrops: 4
   particlesPrefab: {fileID: 5157395080114985353, guid: 6cbd7c4436dcf4a709ab46f353a9d3c3,
     type: 3}
+  mixingSpeed: 1
 --- !u!1 &4368494120379776360
 GameObject:
   m_ObjectHideFlags: 0

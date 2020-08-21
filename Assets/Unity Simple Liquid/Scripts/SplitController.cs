@@ -245,6 +245,9 @@ namespace UnitySimpleLiquid
 			{
 				var lostAmount = liquidContainer.Volume * lostPercentAmount;
 				liquid.liquidContainer.FillAmount += lostAmount;
+
+				//color change in capacity
+				SendLiquidContainer(liquid.liquidContainer);
 			}
 
 			
@@ -269,9 +272,9 @@ namespace UnitySimpleLiquid
 					var liquid = hit.collider.GetComponent<SplitController>();
 					if (liquid && liquid != this)
 					{
-						
+
+
 						return hit;
-						
 					}
 
 
@@ -310,6 +313,25 @@ namespace UnitySimpleLiquid
 			return new RaycastHit();
 		}
 
+		#endregion
+
+		#region ChangeColor
+		//playerMultiply for faster color change
+		[Range(0, 2)]
+		[Tooltip("Mixing speed ratio of different colors")]
+		public float mixingSpeed = 1;
+
+		private void SendLiquidContainer(LiquidContainer lc)
+		{
+			//find the color and split speed
+			Color newColor = liquidContainer.LiquidColor;
+			float ss = liquidContainer.GetSplitController.splitSpeed;
+
+			//we find the coefficient of the volume of the tank and the volume of the incoming fluid
+			float volume = lc.Volume;
+			float koof = ss / (volume * 1000);
+			lc.LiquidColor = Color.Lerp(lc.LiquidColor, newColor, koof * mixingSpeed);
+		}
 		#endregion
 
 		#region Slope Logic

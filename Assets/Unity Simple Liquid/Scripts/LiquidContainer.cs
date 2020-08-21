@@ -1,7 +1,5 @@
 ﻿#pragma warning disable 0649
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnitySimpleLiquid
@@ -42,6 +40,17 @@ namespace UnitySimpleLiquid
         [SerializeField]
 		private bool customVolume;
         private float volume = 1f;
+
+        private SplitController splitController;
+        public SplitController GetSplitController
+        {
+            get { return splitController; }
+        }
+
+        private void Start()
+        {
+            splitController = GetComponent<SplitController>();
+        }
 
         #region Liquid Amount
         // After this values shader might become unstable
