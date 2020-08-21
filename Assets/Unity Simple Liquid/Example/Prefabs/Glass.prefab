@@ -133,6 +133,7 @@ MonoBehaviour:
   liquidColor: {r: 0.09411764, g: 0.36862746, b: 0.13224405, a: 0.4117647}
   fillAmountPercent: 0.491
   customVolume: 0
+  playerMultiply: 1
 --- !u!65 &1222170062
 BoxCollider:
   m_ObjectHideFlags: 0

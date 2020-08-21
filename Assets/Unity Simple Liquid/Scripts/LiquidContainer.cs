@@ -358,7 +358,8 @@ namespace UnitySimpleLiquid
 
         //playerMultiply for faster color change
         [Range(0, 2)]
-        public float playerMultiply = 1;
+        [Tooltip("Mixing speed ratio of different colors")]
+        public float mixingSpeed = 1;
         private void ChangeColorMultiply()
         {
             //we get the necessary data from the listLC
@@ -373,7 +374,7 @@ namespace UnitySimpleLiquid
             //we find the coefficient of the volume of the tank and the volume of the incoming fluid
             float volume = Volume;
             float koof = ss / (volume * 1000);
-            LiquidColor = Color.Lerp(LiquidColor, newColor, koof * playerMultiply);
+            LiquidColor = Color.Lerp(LiquidColor, newColor, koof * mixingSpeed);
             listLC.Clear();
         }
         #endregion
