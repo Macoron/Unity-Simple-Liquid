@@ -316,10 +316,21 @@ namespace UnitySimpleLiquid
 		#endregion
 
 		#region ChangeColor
+		//playerMultiply for faster color change
+		[Range(0, 2)]
+		[Tooltip("Mixing speed ratio of different colors")]
+		public float mixingSpeed = 1;
+
 		private void SendLiquidContainer(LiquidContainer lc)
 		{
-			//keep the liquidContainer in the list
-			lc.GetColorList.Add(liquidContainer);
+			//find the color and split speed
+			Color newColor = liquidContainer.LiquidColor;
+			float ss = liquidContainer.GetSplitController.splitSpeed;
+
+			//we find the coefficient of the volume of the tank and the volume of the incoming fluid
+			float volume = lc.Volume;
+			float koof = ss / (volume * 1000);
+			lc.LiquidColor = Color.Lerp(lc.LiquidColor, newColor, koof * mixingSpeed);
 		}
 		#endregion
 

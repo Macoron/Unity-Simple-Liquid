@@ -1,7 +1,5 @@
 ﻿#pragma warning disable 0649
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnitySimpleLiquid
@@ -349,36 +347,6 @@ namespace UnitySimpleLiquid
         }
         #endregion
 
-        #region ChangeColor
-        private List<LiquidContainer> listLC = new List<LiquidContainer>();
-        public List<LiquidContainer> GetColorList
-        {
-            get { return listLC; }
-        }
-
-        //playerMultiply for faster color change
-        [Range(0, 2)]
-        [Tooltip("Mixing speed ratio of different colors")]
-        public float mixingSpeed = 1;
-        private void ChangeColorMultiply()
-        {
-            //we get the necessary data from the listLC
-            Color newColor = listLC[0].LiquidColor;
-            float ss = listLC[0].splitController.splitSpeed;
-            for (int x = 1; x < listLC.Count; x++)
-            {
-                newColor += listLC[x].LiquidColor;
-                ss += listLC[x].splitController.splitSpeed;
-            }
-            newColor /= listLC.Count;
-            //we find the coefficient of the volume of the tank and the volume of the incoming fluid
-            float volume = Volume;
-            float koof = ss / (volume * 1000);
-            LiquidColor = Color.Lerp(LiquidColor, newColor, koof * mixingSpeed);
-            listLC.Clear();
-        }
-        #endregion
-
         private void OnEnable()
         {
             // reset values for voble effect
@@ -400,9 +368,6 @@ namespace UnitySimpleLiquid
 
             if (Application.isPlaying)
                 UpdateWoble();
-
-            if (listLC.Count > 0)
-                ChangeColorMultiply();
         }
 
         private void OnValidate()

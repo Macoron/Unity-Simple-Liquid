@@ -56,7 +56,6 @@ MonoBehaviour:
   liquidColor: {r: 0.09411765, g: 0.36862746, b: 0.13333334, a: 0.28627452}
   fillAmountPercent: 0.653
   customVolume: 0
-  playerMultiply: 1
 --- !u!136 &1849351744
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -89,6 +88,7 @@ MonoBehaviour:
   maxEdgeDrops: 4
   particlesPrefab: {fileID: 5157395080114985353, guid: 6cbd7c4436dcf4a709ab46f353a9d3c3,
     type: 3}
+  mixingSpeed: 1
 --- !u!1 &4368494120379776360
 GameObject:
   m_ObjectHideFlags: 0
